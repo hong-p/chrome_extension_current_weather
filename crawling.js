@@ -1,7 +1,8 @@
 // console.log('test');
 httpRequest = new XMLHttpRequest();
 httpRequest.onreadystatechange = getContents;
-httpRequest.open('GET', 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=%ED%98%84%EC%9E%AC+%EC%9C%84%EC%B9%98+%EB%82%A0%EC%94%A8');
+// httpRequest.open('GET', 'https://www.google.co.kr/search?source=hp&ei=h2jzXJbwOYXYhwOwn5WgDA&q=test&oq=test&gs_l=psy-ab.12..0l4j0i131l2j0l2j0i131j0.1204.1536..1657...0.0..0.104.490.2j3......0....1..gws-wiz.....0..35i39j0i20i263.HQ4KbYC-C8c');
+httpRequest.open('GET', 'https://search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&query=%EB%82%A0%EC%94%A8&oquery=%EB%82%A0%EC%94%A8&tqi=UnLNVwp0YidssmREnbNssssssmC-456315');
 httpRequest.send();
 
 function getElement(html) {
@@ -15,25 +16,42 @@ function parseHTML(html) {
     console.log(html);
     var el = getElement(html);
 
-    // 도/시
-    var dosi = el.querySelector('._depth0 > .dep1 > a').innerHTML;
-    document.querySelector('#dosi').innerHTML = dosi;
+    // 주소
+    var juso = el.querySelector('.btn_select').innerHTML;
+    document.querySelector('#juso').innerHTML = juso;
 
-    // 구/군
-    var gu = el.querySelector('._depth1 > .dep2 > a').innerHTML;
-    document.querySelector('#gu').innerHTML = gu;
-
-    // 동/면
-    var dong = el.querySelector('._depth2 > .dep3 > a').innerHTML;
-    document.querySelector('#dong').innerHTML = dong;
 
     // 날씨
-    var weather = el.querySelector('.w_now2 > ul > li > .fl > em').innerHTML;
+    var weather = el.querySelector('.todaytemp').innerHTML;
     document.querySelector('#weather').innerHTML = weather;
+
+    // 미세먼지
+    var finedust = el.querySelectorAll('dd>.num')[0].innerHTML;
+    document.querySelector('#finedust').innerHTML = finedust +' '+ dustGrade(finedust.substr(0,finedust.length-3), 'normal');
+
+    // 초미세먼지
+    var chofinedust = el.querySelectorAll('dd>.num')[1].innerHTML;
+    document.querySelector('#chofinedust').innerHTML = chofinedust +' '+ dustGrade(chofinedust.substr(0,chofinedust.length-3),'cho');
+
+}
+
+function dustGrade(num, gubun){
+    var str;
+    var normalGrade = [30, 50, 100];
+    var choGrade = [15, 25, 50];
+    var gijun;
+    if (gubun == 'normal') gijun = normalGrade;
+    else gijun = choGrade;
+    if(num<=gijun[0]) str = '좋음';
+    else if(num<=gijun[1]) str = '보통';
+    else if(num<=gijun[2]) str = '나쁨';
+    else str = '매우나쁨';
+    return str;
 }
 
 function getContents() {
-    console.log(httpRequest.readyState);
+    console.log('readyState : '+httpRequest.readyState);
+    console.log('status : '+httpRequest.status);
     if (httpRequest.readyState === 4) {
         if (httpRequest.status === 200) {
             console.log('success');
