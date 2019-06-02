@@ -24,7 +24,7 @@ function parseHTML(html) {
     // 날씨
     var degree = el.querySelector('.todaytemp').innerHTML;
     var weather = el.querySelector('.cast_txt').innerHTML;
-    document.querySelector('#weather').innerHTML = degree +' '+weather;
+    document.querySelector('#weather').innerHTML = degree +'도, '+weather;
 
     // 미세먼지
     var finedust = el.querySelectorAll('dd>.num')[0].innerHTML;
