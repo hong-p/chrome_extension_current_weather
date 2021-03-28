@@ -10,7 +10,8 @@ window.onload = function (){
     // xmlhttp 요청정보 셋팅
     httpRequest = new XMLHttpRequest();
     httpRequest.onreadystatechange = getContents;
-    httpRequest.open('GET', 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=날씨');
+    // httpRequest.open('GET', 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=날씨');
+    httpRequest.open('GET', 'https://m.search.naver.com/search.naver?where=m&sm=mtb_drt&query=%EB%82%A0%EC%94%A8');
     httpRequest.send();
     
     // xmlhttp 결과
@@ -41,9 +42,11 @@ window.onload = function (){
     
     // 요청으로 받은 결과를 DOMParser를 통해 Element로 parsing한다.  
     function parseHTML(html) {
+        console.log('html>>'+html);
         let parser = new DOMParser();
         let doc = parser.parseFromString(html, 'text/html')
         let body = doc.querySelector('body')
+        console.log(body);
         return body;
     }
     
@@ -52,16 +55,20 @@ window.onload = function (){
     function getInfo(el){
         let info = new Object();
         // 주소
-        info.juso = el.querySelector('.btn_select').firstElementChild.textContent;        
+        info.juso = el.querySelector('.api_subject_bx > .title_wrap > .title_area > .title').textContent
         // 날씨
-        info.degree = el.querySelector('.todaytemp').textContent;
-        info.weather = el.querySelector('.cast_txt').textContent;
+        // 불필요한 텍스트 삭제
+        el.querySelector('.temperature_text').firstElementChild.firstChild.remove();
+        info.degree = el.querySelector('.temperature_text').firstElementChild.textContent;
+        info.weather = el.querySelector('.temperature_info > .summary').firstChild.textContent;
+        
+        info.weatherStatus = el.querySelector('.temperature_info > .summary').lastChild.textContent;
         // 미세먼지
-        info.finedust = el.querySelectorAll('dd>.num')[0].textContent;
+        info.finedust = el.querySelectorAll('.figure_result')[0].textContent;
         info.finedustGrade = dustGrade(info.finedust.substr(0,info.finedust.length-3), 'normal');
         // 초미세먼지
-        info.chofinedust = el.querySelectorAll('dd>.num')[1].textContent;
-        info.ultraFinedustGrade = dustGrade(info.chofinedust.substr(0,info.chofinedust.length-3),'ultra')
+        info.ultraFinedust = el.querySelectorAll('.figure_result')[1].textContent;
+        info.ultraFinedustGrade = dustGrade(info.ultraFinedust.substr(0,info.ultraFinedust.length-3),'ultra')
 
         return info;
     }
@@ -71,12 +78,12 @@ window.onload = function (){
         // 주소
         elJuso.textContent = info.juso;
         //날씨
-        elWeather.textContent = info.degree +'˚C , '+info.weather;
+        elWeather.textContent = `${info.weatherStatus} ${info.degree}˚C, ${info.weather}`;;
         // 미세먼지
-        elFindeust.textContent = info.finedust +' '+ info.finedustGrade;
+        elFindeust.textContent = `${info.finedust}㎍/㎥ ${info.finedustGrade}`;
         setColorAndIcon(info.finedustGrade, elFindeust);
         // 초미세먼지
-        elUltrafinedust.textContent = info.chofinedust +' '+ info.ultraFinedustGrade;
+        elUltrafinedust.textContent = `${info.ultraFinedust}㎍/㎥ ${info.ultraFinedustGrade}`;
         setColorAndIcon(info.ultraFinedustGrade, elUltrafinedust);
     }
     
